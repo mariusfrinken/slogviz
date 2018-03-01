@@ -1,7 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
+
 from matplotlib.dates import DateFormatter
-from logfileclasses import *
+from .logfileclasses import *
 from datetime import timedelta
 
 def transform_select_string(select_string, logfile):

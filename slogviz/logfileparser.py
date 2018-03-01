@@ -1,7 +1,8 @@
 import re
 import datetime
 import json
-from logfileclasses import *
+
+from .logfileclasses import *
 
 """Reads in a file and stores the content.
 Returns a logfile Object containg all this data.

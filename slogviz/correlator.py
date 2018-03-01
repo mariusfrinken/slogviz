@@ -1,6 +1,7 @@
 import re
 import datetime
-from logfileclasses import *
+
+from .logfileclasses import *
 
 
 def mock_rule(list_of_entries): #doubles are not elimanted
