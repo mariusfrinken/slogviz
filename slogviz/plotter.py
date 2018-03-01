@@ -24,8 +24,9 @@ def quit_figure(event):
 def show():
 	plt.show()
 
-def plot_single(log,remove_redundant_entries, selected_sources):
+def plot_single(log,remove_redundant_entries, select_string):
 	"""Plots the Data from one logfile onto one system of coordinates"""
+	selected_sources = transform_select_string(select_string,log)
 	plot_data , lines, dates, _ = log.give_plot_dataP(remove_redundant_entries=remove_redundant_entries, sources=selected_sources)
 	if remove_redundant_entries==1:
 		msize = 10
@@ -39,7 +40,7 @@ def plot_single(log,remove_redundant_entries, selected_sources):
 	ax.xaxis.set_major_formatter(myFmt)
 	plt.title('Analysis of the file \"'+log.name+'\"')
 	plt.legend()
-	plt.subplots_adjust(left=0.18, bottom=0.1, right=0.9, top=0.9)
+	plt.subplots_adjust(left=0.1, bottom=0.18, right=0.9, top=0.95)
 	annot = ax.annotate("", xy=(0,0), xytext=(0.01,0.01) ,textcoords='figure fraction', bbox=dict(boxstyle="round", fc="cyan"), arrowprops=dict(arrowstyle="->"))
 	annot.set_visible(False)
 
@@ -71,8 +72,9 @@ def plot_single(log,remove_redundant_entries, selected_sources):
 	#cid = plt.gcf().canvas.mpl_connect('pick_event', on_pick)
 
 
-def plot_single_file_multiple_sources(log,selected_sources):
+def plot_single_file_multiple_sources(log,select_string):
 	""""""
+	selected_sources = transform_select_string(select_string,log)
 	fig, ax = plt.subplots(figsize=(11,7))
 	fig.autofmt_xdate()
 	plot_data, _ , _ , _ = log.give_plot_dataP()
@@ -256,10 +258,9 @@ def scatter_plot(log):
 
 def superplot(logs,remove_redundant_entries,select_string):
 	for l in logs:
-		selected_sources = transform_select_string(select_string,l)
 		scatter_plot(l)
-		plot_single(l,remove_redundant_entries,selected_sources)
-		plot_single_file_multiple_sources(l,selected_sources)
+		plot_single(l,remove_redundant_entries,select_string)
+		plot_single_file_multiple_sources(l,select_string)
 	plot_multiple(logs,remove_redundant_entries,select_string)
 	plot_multiple_timeline(logs,remove_redundant_entries,select_string)
 	show()
