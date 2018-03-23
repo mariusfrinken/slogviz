@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -18,7 +20,6 @@ def generate_table(x,text,lines, max_rows=100):
 
 
 def webview_run(logfiles):
-
 	checklist = []
 	valuelist = []
 	for x in logfiles:
@@ -44,9 +45,8 @@ def webview_run(logfiles):
 	app.layout = html.Div(children=[
 		html.Link(
 		rel='stylesheet',
-		href='/static/stylesheet.css'
+		href='./static/mycss.css'
 		),
-		html.Div('Assets loading locally'),
 		html.H1(children='Hello, Welcome to SLogVIZ'),
 		dcc.Graph(
 			id='test'
@@ -73,34 +73,34 @@ def webview_run(logfiles):
 			id='test2',
 			figure={
 				'data': [
-	                go.Scatter(
-	                    x = xa[i],
-	                    y = ya[i],
-	                    text=aa[i],
-	                    mode='markers',
-	                    opacity=0.7,
-	                    marker=dict(
-	                        size = aa[i],
-	                        sizeref = 5*max_size/(20**2),
-	                        sizemin = 4
-	                  	),
-	                    line={
-	                        'width': 0.5
-	                        #'color' : 'black'
-	                        #'line': {'width': 0.5, 'color': 'black'}
-	                    },
-	                    name=i
-	                ) for i in range(0,amount)
-	            ],
-	            'layout': go.Layout(
-	                xaxis={'title': 'X'},
-	                yaxis={'title': 'Y'},
-	                margin={'l': 40, 'b': 40, 't': 10, 'r': 10},
-	                legend={'x': 0, 'y': 1},
-	                hovermode='closest',
+						go.Scatter(
+						x = xa[i],
+						y = ya[i],
+						text=aa[i],
+						mode='markers',
+						opacity=0.7,
+						marker=dict(
+							size = aa[i],
+							sizeref = 5*max_size/(20**2),
+							sizemin = 4
+						),
+						line={
+							'width': 0.5
+							#'color' : 'black'
+							#'line': {'width': 0.5, 'color': 'black'}
+						},
+						name=i
+						) for i in range(0,amount)
+				],
+				'layout': go.Layout(
+					xaxis={'title': 'X'},
+					yaxis={'title': 'Y'},
+					margin={'l': 40, 'b': 40, 't': 10, 'r': 10},
+					legend={'x': 0, 'y': 1},
+					hovermode='closest',
 					height= 800
-	            )
-	        }
+				)
+			}
 		),
 		#html.Div(id='tabelle')
 	])

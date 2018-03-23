@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.dates as mdates
 
 from matplotlib.dates import DateFormatter
 from .logfileclasses import *
@@ -76,6 +78,7 @@ def plot_single(log,remove_redundant_entries, select_string):
 def plot_single_file_multiple_sources(log,select_string):
 	""""""
 	selected_sources = transform_select_string(select_string,log)
+
 	fig, ax = plt.subplots(figsize=(11,7))
 	fig.autofmt_xdate()
 	plot_data, _ , _ , _ = log.give_plot_dataP()
@@ -84,20 +87,23 @@ def plot_single_file_multiple_sources(log,select_string):
 	for s in selected_sources:
 		dates = [x.date for x in plot_data if x.source == s]
 		lines = [x.line_nr for x in plot_data if x.source == s]
-		tmp, = ax.plot(dates,lines, label=s,marker='.', linestyle='None', linewidth=0.05, ms=10)
+		tmp, = ax.plot(dates,lines, label=s,marker='.', linestyle='None', linewidth=0.05, ms=10, picker=10)
 		ls.append(tmp)
-	myFmt = DateFormatter("%d.%b %H:%M:%S")
+	myFmt = DateFormatter("%d.%b %H:%M")
+	#plt.locator_params(axis='y', nticks=6)
 	ax.xaxis.set_major_formatter(myFmt)
 	plt.title('Analysis of the files ' + log.name)
-	plt.legend(bbox_to_anchor=(1, 0.8), bbox_transform=plt.gcf().transFigure)
-	plt.subplots_adjust(left=0.18, bottom=0.1, right=0.8, top=0.9)
+	plt.legend(bbox_to_anchor=(0.7, 0.95), bbox_transform=plt.gcf().transFigure)
+	plt.subplots_adjust(left=0.05, bottom=0.15, right=0.6, top=0.95)
+	plt.setp(plt.gca().xaxis.get_majorticklabels(),'rotation', 90)
 	annot = ax.annotate("", xy=(0,0), xytext=(0.01,0.01) ,textcoords='figure fraction', bbox=dict(boxstyle="round", fc="cyan"), arrowprops=dict(arrowstyle="->"))
 	annot.set_visible(False)
 
 	def update_annot(l,ind):
 		x,y = l.get_data()
 		annot.xy = (x[ind["ind"][0]], y[ind["ind"][0]])
-		text = plot_data[y[ind["ind"][0]]-1]
+		temp = [x for x in plot_data if x.line_nr == y[ind["ind"][0]]]
+		text = temp[0]
 		annot.set_text(text)
 		annot.get_bbox_patch().set_alpha(0.4)
 
@@ -134,12 +140,16 @@ def plot_multiple_timeline(logs,remove_redundant_entries, select_string):
 		plot_data_dict[tmp.get_c()] = plot_data
 		line2D_array.append(tmp)
 		c += 1
-	myFmt = DateFormatter("%d.%b %H:%M:%S")
+	myFmt = DateFormatter("%d.%b %Y")
 	ax.xaxis.set_major_formatter(myFmt)
 	ax.set_yticks([0,1])
 	ax.set_yticklabels([x.name for x in logs])
 	names = ' and '.join([x.name for x in logs])
 	plt.title('Analysis of the files ' + names)
+	plt.setp(plt.gca().xaxis.get_majorticklabels(),'rotation', 90)
+
+	#plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=3))
+
 	t = 0.15+(0.1)*len(logs)
 	#plt.legend(bbox_to_anchor=(0.25, t+0.1), bbox_transform=plt.gcf().transFigure)
 	plt.subplots_adjust(left=0.18, bottom=0.15, right=0.9, top=t)
@@ -170,8 +180,6 @@ def plot_multiple_timeline(logs,remove_redundant_entries, select_string):
 						fig.canvas.draw_idle()
 
 	fig.canvas.mpl_connect("motion_notify_event", hover)
-
-
 	cid = plt.gcf().canvas.mpl_connect('key_press_event', quit_figure)
 
 
@@ -239,7 +247,7 @@ def scatter_plot(log):
 	# plt.title('Analysis of the file \"'+log.name+'\"')
 
 
-	width = 0.009
+	width = 0.1
 	normal = ax.bar(dates, areas, width, color='y', label='normal lines')
 	if out_of_order_dates:
 		out_of_order = ax.bar(out_of_order_dates , out_of_order_areas, width, color='r',label='out of order lines')

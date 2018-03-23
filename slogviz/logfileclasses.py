@@ -10,6 +10,9 @@ def give_dates(array):
 def give_full_lines(array):
 	return [x.full_line for x in array]
 
+def give_messages(array):
+	return [x.message for x in array]
+
 def select_entries_param(array,param):
 	if not param or len(param) == 0:
 		return [x for x in array]
@@ -28,7 +31,7 @@ class logfile_entry(object):
 		self.hostname = hostname
 		self.source = source
 	def __str__(self):
-		return 'Entry {0.line_nr}: {0.full_line}'.format(self)
+		return 'Entry {0.line_nr} at {0.date} from hostname {0.hostname} and source {0.source} with the message {0.message}'.format(self)
 
 class logfile(object):
 	"""\
@@ -129,7 +132,7 @@ class logfile(object):
 				if isinstance(o, str):
 					return json.JSONEncoder.default(self,o)
 				return {'{}'.format(o.__class__.__name__): o.__dict__}
-		pathname='{}.json'.format(self.name)
+		pathname='{}.slogviz.json'.format(self.name)
 		ret = open(pathname,'w')
 		json.dump(self, ret, indent=4,cls=CustomEncoder)
 		ret.close()
