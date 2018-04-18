@@ -15,8 +15,8 @@ with open('requirements.txt') as f:
 
 # Package meta-data.
 NAME = 'slogviz'
-DESCRIPTION = 'My short description for my project.'
-URL = 'https://github.com/me/myproject'
+DESCRIPTION = 'SLogVIZ is an Simple Log file Visualizer written in Python. It visualizes log files and correlations found among log file entries using matplotlib.'
+URL = 'https://github.com/mariusfrinken/slogviz'
 EMAIL = 'marius.frinken@fau.de'
 AUTHOR = 'Marius Frinken'
 REQUIRES_PYTHON = '>=3.6.0'
@@ -29,12 +29,8 @@ with io.open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
 	long_description = '\n' + f.read()
 
 about = {}
-if not VERSION:
-	with open(os.path.join(here, NAME, '__version__.py')) as f:
-		exec(f.read(), about)
-else:
-	about['__version__'] = VERSION
-
+with open(os.path.join(here, NAME, '__version__.py')) as f:
+	exec(f.read(), about)
 
 setup(
 	name=NAME,
