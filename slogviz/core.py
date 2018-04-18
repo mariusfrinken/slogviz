@@ -1,58 +1,73 @@
 # -*- coding: utf-8 -*-
+"""The main routine of SLogVIZ.
+It loads all files given by the file_names command line argument and prompts the user to decide for further analysis steps.
+
+
+Command line arguments:
+
+"""
 
 import re
+import time
+import importlib
 import argparse
-import collections
-
+from inspect import getmembers, isfunction
 
 from .logfileclasses import *
-from .plotter import *
 from .logfileparser import *
-from .webview import *
-from .correlator import *
+from .plotter import *
 
-# START of functions
-def transform_select_string(select_string, logfiles):
+# START of  internal functions
+def _transform_select_string(select_string, logfiles):
 	selected_sources = []
 	for log in logfiles:
 		tmp = select_string.split(',')
 		for s in tmp:
 			if s in log.sources:
 				selected_sources.append(s)
-			elif s:
-				pass
-				#print("{} does not contain an entry from the source: '{}'".format(logfile.name,s))
 		if len(selected_sources) == 0:
 			selected_sources += log.sources
 	return selected_sources
 
-def print_action_list(list):
+def _print_action_list(list):
 	print("Please enter the index of one of the following options:")
 	for x in list:
-		print("{}:		{}".format(list.index(x),x))
-	print("{}:		{}".format(len(list),"exit/return"))
+		print("{}:	{}".format(list.index(x),x))
+	print("{}:	{}".format(len(list),"exit/return"))
 	print("===================================================")
 
-def print_welcome():
+def _print_welcome():
 	print("####################################################")
 	print("# Welcome to SLogVIZ, a simple Log file Visualizer #")
 	print("####################################################")
 	print()
+	time.sleep(1)
 
-def edit_selected_sources(original_selected_sources, available_sources):
+def _print_bye():
+	print("####################################################")
+	print("#                       Bye                        #")
+	print("####################################################")
+	time.sleep(1)
+	_delete_print(4)
+
+def _delete_print(number):
+	print('\x1b[1A\x1b[2K'*number)
+
+
+def _edit_selected_sources(original_selected_sources, available_sources):
 	ret = original_selected_sources
-	print("===================================================")
-	print("Editing the selected sources")
 	while(True):
-		list_of_actions = ["remove sources", "add sources", "reset the list"]
-		print_action_list(list_of_actions)
+		list_of_actions = ["remove sources from selection", "add sources to selection", "reset the filter"]
+		_print_action_list(list_of_actions)
 
 		line = input("$ ")
+		_delete_print(len(list_of_actions)+5)
 		if line == "0":
 			while(True):
-				print_action_list(ret)
+
+				_print_action_list(ret)
 				line = input("$ ")
-				print()
+				_delete_print(len(ret)+5)
 				if line.isdigit():
 					line = int(line)
 					if line == len(ret):
@@ -62,9 +77,9 @@ def edit_selected_sources(original_selected_sources, available_sources):
 						del ret[line]
 		elif line == "1":
 			while(True):
-				print_action_list(available_sources)
+				_print_action_list(available_sources)
 				line = input("$ ")
-				print()
+				_delete_print(len(available_sources)+5)
 				if line.isdigit():
 					line = int(line)
 					if line == len(available_sources):
@@ -74,79 +89,156 @@ def edit_selected_sources(original_selected_sources, available_sources):
 						del available_sources[line]
 		elif line == "2":
 			ret = original_selected_sources
-			print("resetted the selected sources")
 		elif line == "3":
 			return ",".join(ret)
-
 	return ret
 
+def _change_remove_redundant():
+	list_of_actions = ["keep entries with the exact same timestamp", "remove such entries, less visual clutter"]
+	ret = 0
+	while True:
+		_print_action_list(list_of_actions)
+		line = input("$ ")
+		_delete_print(len(list_of_actions)+5)
+		if line == "0":
+			ret = 0
+			break
+		elif line == "1":
+			ret = 1
+			break
+		elif line == "2":
+			break
+	return ret
 
-# END of functions
+def _correlate(logfiles):
+	try:
+		module = importlib.import_module("rules")
+	except ImportError:
+		print("rules.py needs to be present in this directory")
+		time.sleep(2)
+		_delete_print(2)
+		return
+	else:
+		list_of_actions = [x for x,y in getmembers(module, isfunction) if not x.startswith('_')]
+		list_of_entries = []
+		for log in logfiles:
+			list_of_entries += log.content
+		while True:
+			_print_action_list(list_of_actions)
+			line = input("$ ")
+			_delete_print(len(list_of_actions)+5)
+			if line.isdigit():
+				line = int(line)
+				if line == len(list_of_actions):
+					break
+				elif line in [list_of_actions.index(x) for x in list_of_actions]:
+					func = getattr(module, list_of_actions[line])
+					ret = func(list_of_entries)
+					if len(ret) == 0:
+						pass
+					else:
+						plot_correlated(ret, logfiles, list_of_actions[line])
+						show()
 
-#START of main programm
+
+
+# END of internal functions
+
+#START of main program
 parser = argparse.ArgumentParser()
-parser.add_argument("-f", "--filename_pattern", help="only files containing this pattern will be opened", default="log")
+parser.add_argument("-f", "--file_names", help="a string containing the names of files to visualize, trailed by a ','", default="")
 parser.add_argument("-r", "--remove_redundant_entries", type=int, default=0, help="0 if entries with the same date should stay, 1 if they shall be removed in the graphical output")
-parser.add_argument("-j", "--export_to_JSON", type=int, default=0, help="if set to 1, one JSON file per logfile will be created")
+parser.add_argument("-j", "--export_to_JSON", type=int, default=0, help="if set to 1, one JSON file per logfile will be created, if set to 2 the structured_data field will be left empty in order to save place")
 parser.add_argument("-s", "--select_by_sources",default='', help="a string containing the name sources, trailed by a ','")
-parser.add_argument("-w", "--web_view", type=int, default=0, help="if set to 1, an interactive website will be hosted on the localhost")
 
 def main():
-	#print("got ya")
 	args = parser.parse_args()
-	file_names = args.filename_pattern.split(',')
 
-	#files = glob.glob(file_names)
+	_print_welcome()
+	file_names = args.file_names.split(',')
 	logfiles = [readin(x) for x in file_names]
 	logfiles = [x for x in logfiles if x ]
+	_delete_print(4)
 
-	if args.web_view:
-		webview_run(logfiles)
-	elif args.export_to_JSON:
+	#when one or more files could not be parsed
+	if not len(logfiles) == len(file_names):
+		for x in file_names:
+			if x not in [y.name for y in logfiles]:
+				print("file " + x + " can not be parsed!")
+				time.sleep(2)
+				_delete_print(2)
+
+	#when all files could not be parsed
+	if len(logfiles) == 0:
+		print("No file was given with the -f argument that slogviz can parse")
+		print()
+		_print_bye()
+		return
+
+
+	if args.export_to_JSON:
 		for x in logfiles:
-			x.export_to_JSON()
+			x.export_to_JSON(sparse=(args.export_to_JSON == 2))
 	else:
-		print_welcome()
-		list_of_actions = ["plot single timeline", "plot multiple timeline", "plot overview timeline", "produce all plots", "edit filter"]
-
+		list_of_actions = ["plot single timeline(s)", "plot single timeline(s), colorcoded by source", "single scatter plot(s)", "plot multiple timeline", "plot overview timeline", "produce all plots", "filter by sources", "edit remove remove_redundant_entries", "correlate"]
 		while True:
-			print_action_list(list_of_actions)
+			_print_action_list(list_of_actions)
 			line = input("$ ")
-			print()
 			if line == "0":
 				for log in logfiles:
 					plot_single(log,args.remove_redundant_entries, args.select_by_sources)
 					show()
+				_delete_print(len(list_of_actions)+5)
 			elif line == "1":
+				for log in logfiles:
+					plot_single_file_multiple_sources(log, args.select_by_sources)
+					show()
+				_delete_print(len(list_of_actions)+5)
+			elif line == "2":
+				frame_seconds = None
+				print("please define a frame in seconds")
+				while True:
+					frame_seconds = input("$ ")
+					if frame_seconds.isdigit():
+						frame_seconds = int(frame_seconds)
+						break
+					else:
+						_delete_print(2)
+				_delete_print(3)
+				for log in logfiles:
+					scatter_plot(log, frame_seconds=frame_seconds)
+					show()
+				_delete_print(len(list_of_actions)+5)
+			elif line == "3":
 				plot_multiple(logfiles,args.remove_redundant_entries,args.select_by_sources)
 				show()
-			elif line == "2":
-				plot_multiple_timeline(logfiles,args.remove_redundant_entries,args.select_by_sources)
+				_delete_print(len(list_of_actions)+5)
+			elif line == "4":
+				plot_multiple_timeline(logfiles,args.select_by_sources)
 				show()
-			elif line == "3":
+				_delete_print(len(list_of_actions)+5)
+			elif line == "5":
 				superplot(logfiles,args.remove_redundant_entries, args.select_by_sources)
 				show()
-			elif line == "4":
-				selected_sources = transform_select_string(args.select_by_sources, logfiles)
+				_delete_print(len(list_of_actions)+5)
+			elif line == "6":
+				_delete_print(len(list_of_actions)+5)
+				selected_sources = _transform_select_string(args.select_by_sources, logfiles)
 				available_sources = []
 				for log in logfiles:
 					available_sources += [x for x in log.sources if x not in selected_sources]
-				args.select_by_sources = edit_selected_sources(selected_sources,available_sources)
-			elif line == "5":
+				args.select_by_sources = _edit_selected_sources(selected_sources,available_sources)
+			elif line == "7":
+				_delete_print(len(list_of_actions)+5)
+				args.remove_redundant_entries = _change_remove_redundant()
+			elif line == "8":
+				_delete_print(len(list_of_actions)+5)
+				_correlate(logfiles)
+			elif line == "9":
+				_delete_print(len(list_of_actions)+5)
 				break
+			else:
+				_delete_print(len(list_of_actions)+5)
+		_print_bye()
 
-		print("####################################################")
-		print("#                       Bye                        #")
-		print("####################################################")
-
-	# elif logfiles:
-	# 	# for l in logfiles:
-	# 	# 	plot_single_file_multiple_sources(l,l.sources)
-	# 	# 	show()
-	# 	# 	print(l.sources)
-	# 	if args.web_view==0:
-	# 		superplot(logfiles,args.remove_redundant_entries,args.select_by_sources)
-	# 		#correlate_multiple_files(logfiles,[mock_rule_mult])
-	# 		#correlate_single_file(logfiles[0],[mock_rule])
-	# 		pass
 
