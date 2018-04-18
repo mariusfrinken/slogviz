@@ -1,11 +1,14 @@
 =========================
 SLogVIZ
 =========================
+**SLogVIZ** is an **Simple Log file Visualizer** written in Python.
+It visualizes log files and correlations found among log file entries using *matplotlib*.
+
+This github is currently under construction!
 
 Introduction
 -------------------------
-**SLogVIZ** is an **Simple Log file Visualizer** written in Python.
-It visualizes log files and correlations found among log file entries using *matplotlib*.
+
 
 Installing and Using
 -------------------------
@@ -22,6 +25,9 @@ On how to enable ANSI Terminal Control: `See this superuser answer
 
 Contributing to SLogVIZ
 -------------------------
+This is my first Python and github project, so please contact me if you have any questions or suggestions:
+``marius.frinken<at>fau.de``
+
 some information for developers interested in contributing to this project
 
 Style
