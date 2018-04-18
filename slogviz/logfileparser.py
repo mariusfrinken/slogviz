@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+
+import platform
 import re
 import datetime
 import time
@@ -12,15 +14,32 @@ from .logfileclasses import *
 
 
 def _print_progress(counter):
+	"""Prints one line with the number of the parsed entry.
+	The line is ended by a carriage return.
+
+	Positional arguments:
+	counter -- the number to print
+	"""
 	print('parse log file entry nr: {}'.format(counter),end='\r')
 
 def _delete_print(number=1):
-	print('\x1b[2K\x1b[1A'*number)
+	"""Deletes a number of lines from stdout.
+	Used to reduce redundant or temporal data from the command line interface.
 
+	Keyword arguments:
+	number -- the amount of lines to delete (default 1)
+	"""
+	if not platform.system() == "Windows":
+		print('\x1b[2K\x1b[1A'*number)
 
 def readin(file):
 	"""Reads in a file and stores the content.
-	Returns a logfile Object containg all the data.
+	Returns a logfileclasses.logfile object containg all the data.
+	This function only checks if the file extension suits to one it might be able to parse.
+	It then chooses the respective function to parse the file and calls it.
+
+	Positional arguments:
+	file -- the name of the file to readin as a string, here name euqals path to the file
 	"""
 	p = re.compile(r'^.*log$')
 	if p.match(file):
@@ -44,9 +63,13 @@ def readin(file):
 					else:
 						return None
 
-
-"""Reads in a file of the syslog format."""
 def readin_syslog(file):
+	"""Reads in a file of the syslog format.
+	Returns a logfileclasses.logfile object containg all the data.
+
+	Positional arguments:
+	file -- the name of the file to readin as a string, here name euqals path to the file
+	"""
 	f = open(file, 'r')
 	counter = 0
 	content = []
@@ -89,9 +112,13 @@ def readin_syslog(file):
 	lf = logfile(file, counter, 'syslog', content,sources)
 	return lf
 
-
-"""Reads in a JSON file"""
 def readin_JSON(file):
+	"""Reads in a file of the JSON format created by a previous slogviz process.
+	Returns a logfileclasses.logfile object containg all the data.
+
+	Positional arguments:
+	file -- the name of the file to readin as a string, here name euqals path to the file
+	"""
 	def object_decoder(obj):
 		"""This function is used to properly load the JSON elements into the corresponding classes."""
 		if 'logfile' in obj:
@@ -114,6 +141,12 @@ def readin_JSON(file):
 	return lf
 
 def readin_chrome_history(file):
+	"""Reads in a file of the SQLite format created by Google Chrome.
+	Returns a logfileclasses.logfile object containg all the data.
+
+	Positional arguments:
+	file -- the name of the file to readin as a string, here name euqals path to the file
+	"""
 	con = lite.connect(file)
 	content = []
 	with con:
@@ -135,8 +168,13 @@ def readin_chrome_history(file):
 	_delete_print()
 	return logfile(file, len(content), 'firefox_sqlite', content, sources)
 
-
 def readin_moz_places(file):
+	"""Reads in a file of the SQLite format created by Mozilla Firefox.
+	Returns a logfileclasses.logfile object containg all the data.
+
+	Positional arguments:
+	file -- the name of the file to readin as a string, here name euqals path to the file
+	"""
 	con = lite.connect(file)
 	content = []
 	with con:
@@ -160,9 +198,13 @@ def readin_moz_places(file):
 		_delete_print()
 	return logfile(file, len(content), 'firefox_sqlite', content, sources)
 
-
-
 def readin_evtx(file):
+	"""Reads in a file of the evtx format created by Microsoft Windows.
+	Returns a logfileclasses.logfile object containg all the data.
+
+	Positional arguments:
+	file -- the name of the file to readin as a string, here name euqals path to the file
+	"""
 	content = []
 	with evtx.Evtx(file) as log:
 		c = 0
@@ -171,8 +213,8 @@ def readin_evtx(file):
 			c += 1
 			print('parse log file entry nr: {}'.format(c),end='\r')
 			try:
-				obj = untangle.parse(record.xml())
-			except OSError:		#untangle can produce an OSError on Windows, since...
+				obj = untangle.parse(record.xml())#untangle can produce an OSError on Windows, since Windows uses a different format for timestamps
+			except OSError:
 				c -= 1
 				continue
 			curr_obj = obj.Event.System

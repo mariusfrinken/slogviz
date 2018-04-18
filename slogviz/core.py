@@ -11,6 +11,7 @@ import re
 import time
 import importlib
 import argparse
+import platform
 from inspect import getmembers, isfunction
 
 from .logfileclasses import *
@@ -51,7 +52,14 @@ def _print_bye():
 	_delete_print(4)
 
 def _delete_print(number):
-	print('\x1b[1A\x1b[2K'*number)
+	"""Deletes a number of lines from stdout.
+	Used to reduce redundant or temporal data from the command line interface.
+
+	Keyword arguments:
+	number -- the amount of lines to delete (default 1)
+	"""
+	if not platform.system() == "Windows":
+		print('\x1b[1A\x1b[2K'*number)
 
 
 def _edit_selected_sources(original_selected_sources, available_sources):
