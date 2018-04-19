@@ -1,44 +1,50 @@
 # -*- coding: utf-8 -*-
+
+"""The sub module of slogviz that takes care of producing matplotlib plots.
+
+Exported functions:
+
+"""
+
 import matplotlib.pyplot as plt
 
 from datetime import timedelta
 from matplotlib.dates import DateFormatter
 
 #from .logfileclasses import *
-# this import is not necessayr because of the overal structure, but keep in mind that classes and functions defined there are used here
+# this import is not necessary because of the overall structure, but keep in mind that classes and functions defined there are used here
 
-def transform_select_string(select_string, logfile):
+#START internal functions
+def _transform_select_string(select_string, logfile):
 	selected_sources = []
 	tmp = select_string.split(',')
 	for s in tmp:
-		if s in logfile.sources:
+		if s in logfile.sources and s not in selected_sources:
 			selected_sources.append(s)
 	if len(selected_sources) == 0:
 		selected_sources = logfile.sources
 	return selected_sources
 
-def quit_figure(event):
+def _quit_figure(event):
 	"""Helper function for closing pyplot windows with the 'q' key"""
 	if event.key == 'q':
 		plt.close(event.canvas.figure)
+#END internal functions
 
 def show():
+	"""Finally produces one ore multiple pyplot plots.
+	Has to be called once after one calling any of the other public functions in order to see a plot.
+	"""
 	plt.show()
 
 #START plots
-
-def plot_single(log,remove_redundant_entries, select_string):
+def plot_single(log, remove_redundant_entries, select_string):
 	"""Plots the Data from one logfile onto one system of coordinates"""
-	selected_sources = transform_select_string(select_string,log)
+	selected_sources = _transform_select_string(select_string,log)
 	plot_data , lines, dates, _ = log.give_plot_data(remove_redundant_entries=remove_redundant_entries, sources=selected_sources)
-	if remove_redundant_entries==1:
-		msize = 10
-	else:
-		msize=5
-
 	fig, ax = plt.subplots(figsize=(11,7))
 	fig.autofmt_xdate()
-	l, = plt.plot(dates,lines,picker=10, color='red', marker='.', linestyle='-', linewidth=0.5, ms=msize, mec='blue', label=log.name )
+	l, = plt.plot(dates,lines,picker=10, color='red', marker='.', linestyle='-', linewidth=0.5, ms=5, mec='blue', label=log.name )
 	myFmt = DateFormatter("%Y %d.%b %H:%M:%S")
 	ax.xaxis.set_major_formatter(myFmt)
 	plt.title('Analysis of the file \"'+log.name+'\"')
@@ -52,8 +58,6 @@ def plot_single(log,remove_redundant_entries, select_string):
 	def update_annot(ind):
 		x,y = l.get_data()
 		annot.xy = (x[ind["ind"][0]], y[ind["ind"][0]])
-		#text = "{}, {}".format(" ".join(list(map(str,ind["ind"]))), " ".join(["n" for n in ind["ind"]]))
-		#text = " \n".join([plot_data[n-1].__str__() for n in ind["ind"]])
 		if remove_redundant_entries == 1:
 			text = plot_data[y[ind["ind"][0]]-1]
 		else:
@@ -76,18 +80,16 @@ def plot_single(log,remove_redundant_entries, select_string):
 					fig.canvas.draw_idle()
 
 	fig.canvas.mpl_connect("motion_notify_event", hover)
+	fig.canvas.mpl_connect('key_press_event', _quit_figure)
 
-	fig.canvas.mpl_connect('key_press_event', quit_figure)
-	#cid = plt.gcf().canvas.mpl_connect('pick_event', on_pick)
-
-def plot_single_file_multiple_sources(log, select_string):
-	""""""
-
-	selected_sources = transform_select_string(select_string,log)
+def plot_single_file_multiple_sources(log, remove_redundant_entries, select_string):
+	"""
+	"""
+	selected_sources = _transform_select_string(select_string,log)
 
 	fig, ax = plt.subplots(figsize=(11,7))
 	fig.autofmt_xdate()
-	plot_data, _ , _ , _ = log.give_plot_data()
+	plot_data, _ , _ , _ = log.give_plot_data(remove_redundant_entries=remove_redundant_entries)
 	color_map = plt.get_cmap('gnuplot2')
 	color_index = [color_map(1.*i/len(selected_sources)) for i in range(0,len(selected_sources))]
 	ax.set_prop_cycle(color=color_index)
@@ -96,7 +98,10 @@ def plot_single_file_multiple_sources(log, select_string):
 	counter = 0
 	for s in selected_sources:
 		dates = [x.timestamp for x in plot_data if x.source == s]
-		lines = [x.id for x in plot_data if x.source == s]
+		if remove_redundant_entries == 1:
+			lines = [plot_data.index(x) for x in plot_data if x.source == s]
+		else:
+			lines = [x.id for x in plot_data if x.source == s]
 		breakline_s = s
 		if len(breakline_s) >= 23:
 			for i in range(0,int(len(breakline_s)/23)):
@@ -107,20 +112,29 @@ def plot_single_file_multiple_sources(log, select_string):
 	myFmt = DateFormatter("%d.%b %H:%M")
 
 	ax.xaxis.set_major_formatter(myFmt)
-	plt.title('Analysis of the files ' + log.name)
+
 	plt.legend(loc='upper left', bbox_to_anchor=(0, 0.95), bbox_transform=plt.gcf().transFigure)
-	plt.subplots_adjust(left=0.3, bottom=0.23, right=0.95, top=0.95)
-	#plt.setp(plt.gca().xaxis.get_majorticklabels(),'rotation', 90)
+
 	annot = ax.annotate("", xy=(0,0), xytext=(0.23,0.01) ,textcoords='figure fraction', bbox=dict(boxstyle="round", fc="cyan"), arrowprops=dict(arrowstyle="->"))
 	annot.set_visible(False)
 	ax.set_xlabel('timestamp')
-	ax.set_ylabel('sequential id')
+	if remove_redundant_entries == 1:
+		ax.set_ylabel('number of sequential entry')
+		plt.title('Analysis of the files ' + log.name +'\n' + 'where all entries having the same timestamp are removed')
+		plt.subplots_adjust(left=0.3, bottom=0.23, right=0.95, top=0.90)
+	else:
+		plt.title('Analysis of the files ' + log.name)
+		ax.set_ylabel('sequential id')
+		plt.subplots_adjust(left=0.3, bottom=0.23, right=0.95, top=0.95)
 
 	def update_annot(l,ind):
 		x,y = l.get_data()
 		annot.xy = (x[ind["ind"][0]], y[ind["ind"][0]])
-		temp = [x for x in plot_data if x.id == y[ind["ind"][0]]]
-		text = temp[0]
+		if remove_redundant_entries == 1:
+			text = plot_data[y[ind["ind"][0]]]
+		else:
+			temp = [x for x in plot_data if x.id == y[ind["ind"][0]]]
+			text = temp[0]
 		annot.set_text(text)
 		annot.get_bbox_patch().set_alpha(0.4)
 
@@ -139,9 +153,9 @@ def plot_single_file_multiple_sources(log, select_string):
 						fig.canvas.draw_idle()
 
 	fig.canvas.mpl_connect("motion_notify_event", hover)
-	cid = plt.gcf().canvas.mpl_connect('key_press_event', quit_figure)
+	cid = plt.gcf().canvas.mpl_connect('key_press_event', _quit_figure)
 
-def plot_multiple_timeline(logs, select_string):
+def plot_multiple_timeline(logs):
 	"""Plots the Data from logs onto one system of coordiantes"""
 	fig, ax = plt.subplots(figsize=(11,7))
 	fig.autofmt_xdate()
@@ -149,8 +163,7 @@ def plot_multiple_timeline(logs, select_string):
 	line2D_array = []
 	plot_data_dict = {}
 	for l in logs:
-		selected_sources = transform_select_string(select_string, l)
-		plot_data, _, dates, _ = l.give_plot_data(sources=selected_sources)
+		plot_data, _, dates, _ = l.give_plot_data()
 		tmp, = ax.plot(dates, [c]*len(dates), label=l.name, picker=4, marker='.', linestyle='-', linewidth=0.05, ms=5)
 		plot_data_dict[tmp.get_c()] = plot_data
 		line2D_array.append(tmp)
@@ -193,7 +206,7 @@ def plot_multiple_timeline(logs, select_string):
 						fig.canvas.draw_idle()
 
 	fig.canvas.mpl_connect("motion_notify_event", hover)
-	cid = plt.gcf().canvas.mpl_connect('key_press_event', quit_figure)
+	cid = plt.gcf().canvas.mpl_connect('key_press_event', _quit_figure)
 
 def plot_multiple(logs, remove_redundant_entries, select_string):
 	"""Plots the Data from logs onto one system of coordiantes"""
@@ -203,7 +216,7 @@ def plot_multiple(logs, remove_redundant_entries, select_string):
 	line2D_array = []
 	plot_data_dict = {}
 	for l in logs:
-		selected_sources = transform_select_string(select_string,l)
+		selected_sources = _transform_select_string(select_string,l)
 		pld, lines, dates, _ = l.give_plot_data(remove_redundant_entries=remove_redundant_entries, sources=selected_sources)
 		tmp, = ax.plot(dates, lines, label=l.name, picker=4, marker='.', linestyle='-', linewidth=0.5, ms=3.5)
 		line2D_array.append(tmp)
@@ -254,7 +267,7 @@ def plot_multiple(logs, remove_redundant_entries, select_string):
 	fig.canvas.mpl_connect("motion_notify_event", hover)
 
 
-	cid = plt.gcf().canvas.mpl_connect('key_press_event', quit_figure)
+	cid = plt.gcf().canvas.mpl_connect('key_press_event', _quit_figure)
 
 def scatter_plot(log, frame_seconds=-1):
 	if frame_seconds == -1:
@@ -273,16 +286,16 @@ def scatter_plot(log, frame_seconds=-1):
 
 	plt.legend()
 	plt.subplots_adjust(left=0.15, bottom=0.2, right=0.9, top=0.9)
-	cid = fig.canvas.mpl_connect('key_press_event', quit_figure)
+	cid = fig.canvas.mpl_connect('key_press_event', _quit_figure)
 
 
 def superplot(logs,remove_redundant_entries,select_string):
 	for l in logs:
 		scatter_plot(l)
 		plot_single(l,remove_redundant_entries,select_string)
-		plot_single_file_multiple_sources(l,select_string)
+		plot_single_file_multiple_sources(l, remove_redundant_entries, select_string)
 	plot_multiple(logs,remove_redundant_entries,select_string)
-	plot_multiple_timeline(logs,select_string)
+	plot_multiple_timeline(logs)
 	show()
 
 
@@ -345,7 +358,7 @@ def plot_correlated(list_of_entries, logfiles, rule_name):
 						fig.canvas.draw_idle()
 
 	fig.canvas.mpl_connect("motion_notify_event", hover)
-	fig.canvas.mpl_connect('key_press_event', quit_figure)
+	fig.canvas.mpl_connect('key_press_event', _quit_figure)
 
 
 

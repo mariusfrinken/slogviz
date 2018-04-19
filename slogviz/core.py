@@ -24,10 +24,11 @@ def _transform_select_string(select_string, logfiles):
 	for log in logfiles:
 		tmp = select_string.split(',')
 		for s in tmp:
-			if s in log.sources:
+			if s in log.sources and s not in selected_sources:
 				selected_sources.append(s)
-		if len(selected_sources) == 0:
-			selected_sources += log.sources
+	if len(selected_sources) == 0:
+		for log in logfiles:
+			selected_sources += [x for x in log.sources if x not in selected_sources]
 	return selected_sources
 
 def _print_action_list(list):
@@ -58,7 +59,7 @@ def _delete_print(number):
 	Keyword arguments:
 	number -- the amount of lines to delete (default 1)
 	"""
-	if not platform.system() == "Windows":
+	if not platform.system() == "Windows":#Windows does not fully implement ANSI Control Characters, see README
 		print('\x1b[1A\x1b[2K'*number)
 
 
@@ -154,7 +155,7 @@ def _correlate(logfiles):
 
 #START of main program
 parser = argparse.ArgumentParser()
-parser.add_argument("-f", "--file_names", help="a string containing the names of files to visualize, trailed by a ','", default="")
+parser.add_argument("-f", "--file_names", required=True, help="a string containing the names of files to visualize, trailed by a ','", default="")
 parser.add_argument("-r", "--remove_redundant_entries", type=int, default=0, help="0 if entries with the same date should stay, 1 if they shall be removed in the graphical output")
 parser.add_argument("-j", "--export_to_JSON", type=int, default=0, help="if set to 1, one JSON file per logfile will be created, if set to 2 the structured_data field will be left empty in order to save place")
 parser.add_argument("-s", "--select_by_sources",default='', help="a string containing the name sources, trailed by a ','")
@@ -188,7 +189,7 @@ def main():
 		for x in logfiles:
 			x.export_to_JSON(sparse=(args.export_to_JSON == 2))
 	else:
-		list_of_actions = ["plot single timeline(s)", "plot single timeline(s), colorcoded by source", "single scatter plot(s)", "plot multiple timeline", "plot overview timeline", "produce all plots", "filter by sources", "edit remove remove_redundant_entries", "correlate"]
+		list_of_actions = ["plot single timeline(s)", "plot single timeline(s), colorcoded by source", "plot single timeline bar chart(s)", "plot multiple timeline", "plot overview timeline", "produce all plots", "filter by sources (does not affect option 2 or 4)", "edit remove_redundant_entries", "correlate with rules.py"]
 		while True:
 			_print_action_list(list_of_actions)
 			line = input("$ ")
@@ -199,7 +200,7 @@ def main():
 				_delete_print(len(list_of_actions)+5)
 			elif line == "1":
 				for log in logfiles:
-					plot_single_file_multiple_sources(log, args.select_by_sources)
+					plot_single_file_multiple_sources(log, args.remove_redundant_entries, args.select_by_sources)
 					show()
 				_delete_print(len(list_of_actions)+5)
 			elif line == "2":
@@ -222,7 +223,7 @@ def main():
 				show()
 				_delete_print(len(list_of_actions)+5)
 			elif line == "4":
-				plot_multiple_timeline(logfiles,args.select_by_sources)
+				plot_multiple_timeline(logfiles)
 				show()
 				_delete_print(len(list_of_actions)+5)
 			elif line == "5":
