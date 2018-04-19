@@ -4,7 +4,9 @@ SLogVIZ
 **SLogVIZ** is an **Simple Log file Visualizer** written in Python.
 It visualizes log files and correlations found among log file entries using *matplotlib*.
 
-This github is currently under construction!
+**This project is currently under construction!**
+
+.. image:: https://raw.githubusercontent.com/mariusfrinken/slogviz/assets/screenshot.png
 
 Introduction
 -------------------------
@@ -12,10 +14,23 @@ Introduction
 
 Installing and Using
 -------------------------
+You have the choice, the module can be used with or without installing it.
+
+General steps:
+
 1. install Python 3.6 or higher
 2. install pip
 3. download slogviz
-4. open a console and navigate to the slogviz root directory and enter ``python3 setup.py install`` in a terminal
+
+install:
+
+4. open a console and navigate to the slogviz root directory and enter ``python setup.py install`` in a terminal
+5. now the program can be executed by entering ``python -m slogviz``
+
+local usage:
+
+4. open a console and navigate to the slogviz root directory and enter ``pip install -r requirements.txt``
+5. now the program can be executed by entering ``python -m slogviz``, but only in the slogviz root directory
 
 Windows 10:
 
