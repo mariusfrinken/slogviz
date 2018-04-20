@@ -20,12 +20,11 @@ You have the choice, the module can be used with or without installing it.
 General steps:
 
 1. install Python 3.6 or higher
-2. install pip
-3. download slogviz
-
+2. download slogviz
+3. decide whether to install the program or to NOT install it
 install:
 
-4. open a console and navigate to the slogviz root directory and enter ``python setup.py install`` in a terminal
+4. open a console and navigate to the slogviz root directory and enter UNIX: ``python setup.py install`` in a terminal or WINDOWS: ``.\setup.py install`` in the cmd.exe or Windows-Powershell
 5. now the program can be executed by entering ``python -m slogviz``
 
 local usage:
