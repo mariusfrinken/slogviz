@@ -1,0 +1,9 @@
+Mar 23 22:17:40 hostA sourceA: event A
+Mar 23 22:17:41 hostA sourceC: event C
+Mar 23 22:17:42 hostA sourceB: event C
+Mar 23 22:17:42 hostA sourceB: event C
+Mar 23 22:17:53 hostA sourceB: event C
+Mar 23 23:17:40 hostA sourceD: event A
+Mar 23 23:37:42 hostA sourceB: event C
+Mar 23 23:58:00 hostA sourceB: event C
+Mar 23 23:59:01 hostA sourceB: event C
