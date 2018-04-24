@@ -81,10 +81,10 @@ def plot_single(log, remove_redundant_entries, select_string):
 
 	if remove_redundant_entries == 1:
 		ax.set_ylabel('number of sequential entry')
-		plt.title('Analysis of the files ' + log.name +'\n' + 'where all entries having the same timestamp are removed')
+		plt.title('Analysis of the file ' + log.name +'\n' + 'where all entries having the same timestamp are removed')
 		plt.subplots_adjust(left=0.1, bottom=0.23, right=0.95, top=0.90)
 	else:
-		plt.title('Analysis of the files ' + log.name)
+		plt.title('Analysis of the file ' + log.name)
 		ax.set_ylabel('sequential id')
 		plt.subplots_adjust(left=0.1, bottom=0.23, right=0.95, top=0.95)
 
@@ -176,10 +176,10 @@ def plot_single_file_colored(log, remove_redundant_entries, select_string, rev=T
 	ax.set_xlabel('timestamps in UTC')
 	if remove_redundant_entries == 1:
 		ax.set_ylabel('number of sequential entry')
-		plt.title('Analysis of the files ' + log.name +'\n' + 'where all entries having the same timestamp are removed')
+		plt.title('Analysis of the file ' + log.name +'\n' + 'where all entries having the same timestamp are removed')
 		plt.subplots_adjust(left=0.3, bottom=0.23, right=0.95, top=0.90)
 	else:
-		plt.title('Analysis of the files ' + log.name)
+		plt.title('Analysis of the file ' + log.name)
 		ax.set_ylabel('sequential id')
 		plt.subplots_adjust(left=0.3, bottom=0.23, right=0.95, top=0.95)
 
