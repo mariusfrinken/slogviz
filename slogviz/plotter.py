@@ -167,14 +167,12 @@ def plot_single_file_colored(log, remove_redundant_entries, select_string, rev=T
 
 
 	myFmt = DateFormatter("%d.%b %H:%M")
-
 	ax.xaxis.set_major_formatter(myFmt)
-
-
 	plt.legend(loc='upper left', bbox_to_anchor=(0, 0.95), bbox_transform=plt.gcf().transFigure)
 
 	annot = ax.annotate("", xy=(0,0), xytext=(0.23,0.01) ,textcoords='figure fraction', bbox=dict(boxstyle="round", fc="cyan"), arrowprops=dict(arrowstyle="->"))
 	annot.set_visible(False)
+
 	ax.set_xlabel('timestamps in UTC')
 	if remove_redundant_entries == 1:
 		ax.set_ylabel('number of sequential entry')
@@ -211,7 +209,7 @@ def plot_single_file_colored(log, remove_redundant_entries, select_string, rev=T
 						fig.canvas.draw_idle()
 
 	fig.canvas.mpl_connect("motion_notify_event", hover)
-	cid = plt.gcf().canvas.mpl_connect('key_press_event', _quit_figure)
+	fig.canvas.mpl_connect('key_press_event', _quit_figure)
 
 def plot_timeline_overview(logs):
 	"""This function plots the timestamps of a set of logfiles to the X-axis,
@@ -238,7 +236,6 @@ def plot_timeline_overview(logs):
 	names = ' and '.join([x.name for x in logs])
 	plt.title('Analysis of the files ' + names)
 	t = 0.15+(0.1)*len(logs)
-	#plt.legend(bbox_to_anchor=(0.25, t+0.1), bbox_transform=plt.gcf().transFigure)
 	plt.subplots_adjust(left=0.23, bottom=0.2, right=0.9, top=t)
 
 	annot = ax.annotate("", xy=(0,0), xytext=(0.01,0.01) ,textcoords='figure fraction', bbox=dict(boxstyle="round", fc="cyan"), arrowprops=dict(arrowstyle="->"))
@@ -269,7 +266,7 @@ def plot_timeline_overview(logs):
 						fig.canvas.draw_idle()
 
 	fig.canvas.mpl_connect("motion_notify_event", hover)
-	cid = plt.gcf().canvas.mpl_connect('key_press_event', _quit_figure)
+	fig.canvas.mpl_connect('key_press_event', _quit_figure)
 
 def plot_multiple_timeline(logs, remove_redundant_entries, select_string):
 	"""Produces a plot with the same axis as the plot_single function,
@@ -301,9 +298,7 @@ def plot_multiple_timeline(logs, remove_redundant_entries, select_string):
 	else:
 		plt.title('Analysis of the files ' + names)
 		plt.subplots_adjust(left=0.1, bottom=0.18, right=0.9, top=0.95)
-
 	plt.legend()
-
 	annot = ax.annotate("", xy=(0,0), xytext=(0.01,0.01) ,textcoords='figure fraction', bbox=dict(boxstyle="round", fc="cyan"), arrowprops=dict(arrowstyle="->"))
 	annot.set_visible(False)
 	ax.set_xlabel('timestamps in UTC')
@@ -336,9 +331,7 @@ def plot_multiple_timeline(logs, remove_redundant_entries, select_string):
 						fig.canvas.draw_idle()
 
 	fig.canvas.mpl_connect("motion_notify_event", hover)
-
-
-	cid = plt.gcf().canvas.mpl_connect('key_press_event', _quit_figure)
+	fig.canvas.mpl_connect('key_press_event', _quit_figure)
 
 def plot_bar_chart(log, frame_seconds=-1):
 	"""This function produces a plot where the timestamps of logfile_entries are displayed on the X-axis, while the Y-axis is used to indicate the amount of entries.
@@ -366,7 +359,7 @@ def plot_bar_chart(log, frame_seconds=-1):
 
 	plt.legend()
 	plt.subplots_adjust(left=0.15, bottom=0.2, right=0.9, top=0.9)
-	cid = fig.canvas.mpl_connect('key_press_event', _quit_figure)
+	fig.canvas.mpl_connect('key_press_event', _quit_figure)
 
 def superplot(logs, remove_redundant_entries, select_string):
 	"""Produces all plots at once.
@@ -420,7 +413,6 @@ def plot_correlated(list_of_entries, logfiles, rule_name):
 
 	names = ' and '.join([x.name for x in logfiles])
 	plt.title('Correlation of files ' + names + '\n with rule ' + rule_name )
-	#plt.legend()
 	t = 0.15+(0.1)*len(logfiles)
 	plt.subplots_adjust(left=0.23, bottom=0.2, right=0.9, top=t)
 	annot = ax.annotate("", xy=(0,0), xytext=(0.01,0.01) ,textcoords='figure fraction', bbox=dict(boxstyle="round", fc="cyan"), arrowprops=dict(arrowstyle="->"))
