@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 
-""" This sub module defines the logfile and logfile_entry classes.
-All functions defined in this module are considered private, they are not invoked by any other module of slogviz.
+"""This sub module defines the logfile and logfile_entry classes that are used by all other sub modules of SLogVIZ.
+This module has no exported functions.
+
+Exported classes:
+logfile_entry -- holds the data of one single log file entry
+logfile -- holds the data of a whole log file
 """
 
 import datetime
@@ -9,28 +13,43 @@ import json
 import collections
 
 #START internal functions
-def _give_dates(array):
-	return [x.timestamp for x in array]
+def _give_dates(list):
+	"""Returns all timestamps of a list of logfile_entry objects."""
+	return [x.timestamp for x in list]
 
-def _give_full_lines(array):
-	return [x.structured_data for x in array]
+def _give_full_lines(list):
+	"""Returns all structured_data fields of a list of logfile_entry objects."""
+	return [x.structured_data for x in list]
 
-def _give_messages(array):
-	return [x.message for x in array]
+def _give_messages(list):
+	"""Returns all messages of a list of logfile_entry objects."""
+	return [x.message for x in list]
 
-def _give_ids(array, remove_redundant_entries):
+def _give_ids(list, remove_redundant_entries):
+	"""Returns all ids of a list of logfile_entry objects.
+	If the remove_redundant_entries argument is 1, then simply the range
+	of from 1 to length(list+1) is returned.
+	"""
 	if remove_redundant_entries == 1:
-		return [x for x in range(1,len(array)+1)] #TODO!!!!
+		return [x for x in range(1,len(list)+1)]
 	else:
-		return [x.id for x in array]
+		return [x.id for x in list]
 
-def select_entries_param(array, param):
+def _select_entries_param(list, param):
+	"""Takes a list of logfile_entry objects and returns a sub set of it.
+	The sub set includes a entries that have a source attribute that occurs in the param argument.
+
+	Positional arguments:
+	list -- a list of logfile_entry objects
+	param -- a list of strings, representing sources
+	"""
 	if not param or len(param) == 0:
-		return [x for x in array]
-	return [x for x in array if x.source in param]
+		return [x for x in list]
+	return [x for x in list if x.source in param]
+
 #END internal functions
 
-
+#START exported classes
 class logfile_entry(object):
 	"""A class for storing one single log file entry
 	"""
@@ -39,12 +58,12 @@ class logfile_entry(object):
 		self.origin_name = origin_name
 		self.message = message
 		self.structured_data = structured_data
-		self.timestamp = timestamp
+		self.timestamp = timestamp # a datetime object assumed to be in UTC format
 		self.hostname = hostname
 		self.source = source
 
 	def __str__(self):
-		return 'Entry {0.id} at {0.timestamp} from hostname {0.hostname} and source {0.source} with the message:\n {0.message}'.format(self)
+		return 'Entry {0.id} at {0.timestamp} from file {0.origin_name}, hostname {0.hostname} and source {0.source} with the message:\n {0.message}'.format(self)
 
 class logfile(object):
 	"""A class for storing content and meta data of one log file
@@ -72,7 +91,7 @@ class logfile(object):
 			ret = self.remove_redundant_entries()
 		else:
 			ret = self.content
-		ret = select_entries_param(ret,sources)
+		ret = _select_entries_param(ret,sources)
 		ret.sort(key=lambda x: x.id)
 		return ret, _give_ids(ret, remove_redundant_entries), _give_dates(ret), _give_messages(ret)
 
@@ -93,7 +112,10 @@ class logfile(object):
 		"""Counts how many entries in self.content in frames of the size frame_seconds exist and returns three lists.
 		The first list is an ascending list of all found frames ([1,2,3,...n] where n is the amount of found frames).
 		The second list stores the timestamp of the beginning of each frame in the first list.
-		The third list represents the amounts of entries in the frames of the first list ([99,10,2,...] would mean that in frame 1 there are 99 entries).
+		The third list represents the amounts of entries in the frames of the first list
+
+		Example: ([1,2],[X,Y],[99,10]) would mean that in frame 1, beginning at time X there are 99 entries and
+		in frame 2, beginning at time Y, there are 10 entries.
 
 		Keyword arguments:
 		frame_seconds -- the size of each time frame in seconds (default 0)
@@ -137,3 +159,5 @@ class logfile(object):
 		ret = open(pathname,'w')
 		json.dump(self, ret, indent=4, cls=CustomEncoder)
 		ret.close()
+
+#END exported classes
