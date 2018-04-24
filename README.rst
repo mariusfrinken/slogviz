@@ -35,7 +35,7 @@ SLogVIZ is intended to be executed as a Python module with the Python3 interpret
 
 Here is a simple guide on how to get SLogVIZ working:
 
-1. install Python 3.6 or higher
+1. install Python 3.6 or higher (PIP shall be installed and the PATH variable needs to include Python, these things should be handled by the default installation process)
 2. download the latest version of SLogVIZ here_ and extract the .zip file
 3. decide whether to install the program or to NOT install it
 
