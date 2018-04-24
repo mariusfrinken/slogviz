@@ -203,7 +203,11 @@ def _readin_evtx(file):
 				unparsed_entries += 1
 				continue
 			curr_obj = obj.Event.System
-			date = datetime.datetime.strptime(curr_obj.TimeCreated['SystemTime'],"%Y-%m-%d %H:%M:%S.%f")
+			date = curr_obj.TimeCreated['SystemTime']
+			if '.' in date:
+				date = datetime.datetime.strptime(date,"%Y-%m-%d %H:%M:%S.%f")
+			else:
+				date = datetime.datetime.strptime(date,"%Y-%m-%d %H:%M:%S")
 			full_line = record.xml()
 			if hasattr(curr_obj,'Provider'):
 				source = curr_obj.Provider['Name']
