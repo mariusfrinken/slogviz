@@ -11,10 +11,11 @@ It visualizes log files and correlations found among log file entries using `mat
 
 Introduction
 -------------------------
+SLogVIZ is designed to be a helpful tool for forensic investigations, by producing visualizations of log files.
 
 File Formats
 #########################
-At the current state, SLogVIZ is able to parse syslog file , Windows Event Log (evtx) files and SQLite files created by Firefox and Chrome. Due to different timestamps definitions, SLogVIZ may not be able to read all entries of evtx files, when using Windows. In this case a warning is sent to the user.
+At the current state, SLogVIZ is able to parse syslog files , Windows Event Log (evtx) files and SQLite files created by Firefox and Chrome. Due to different timestamps definitions, SLogVIZ may not be able to read all entries of evtx files, when using Windows. In this case a warning is sent to the user.
 
 In order to parse any file, the filename and extension needs to be as follows:
 
@@ -54,16 +55,19 @@ On how to enable ANSI Terminal Control: `See this superuser answer
 <https://superuser.com/a/1300251>`_.
 
 
+.. image:: https://raw.githubusercontent.com/mariusfrinken/slogviz/assets/menu.png
+
+License and other legal stuff
+-------------------------------
+This tool is published under the MIT License, see `LICENCE
+<https://raw.githubusercontent.com/mariusfrinken/slogviz/master/LICENSE>`_.
+
+The author wants to clarify that SLogVIZ is not meant to serve as a total replacement of conventional log analysis tools and methods.
+
 Contributing to SLogVIZ
 -------------------------
-This is my first Python and github project, so please contact me if you have any questions or suggestions:
-``marius.frinken<at>fau.de``
-
-<some information for developers interested in contributing to this project>
-
-Style
-#########################
-In this project, I used *tabs* for indentation. As one of my professor likes to say "I don't believe in numbers greater than 3", I personally find it irritating to see multiple spaces instead of one tab symbol in my code.
+Please refer to the `Wiki
+<https://github.com/mariusfrinken/slogviz/wiki>`_.
 
 
 
