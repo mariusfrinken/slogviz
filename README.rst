@@ -12,6 +12,21 @@ It visualizes log files and correlations found among log file entries using `mat
 Introduction
 -------------------------
 
+File Formats
+#########################
+At the current state, SLogVIZ is able to parse syslog file , Windows Event Log (evtx) files and SQLite files created by Firefox and Chrome. Due to different timestamps definitions, SLogVIZ may not be able to read all entries of evtx files, when using Windows. In this case a warning is sent to the user.
+
+In order to parse any file, the filename and extension needs to be as follows:
+
+==================  ====================================  ==============================
+ File Formats        File Names/Extensions                 Examples
+==================  ====================================  ==============================
+ syslog              \*log                                 syslog, auth.log, system.log
+ evtx                \*.evtx                               System.evtx
+ SQLite - Firefox    \*places.sqlite                       places.sqlite, case42_places.sqlite
+ SQLite - Chrome     \*History                             History, case42_History
+ JSON                \*.slogviz.json                       syslog.slogviz.json
+==================  ====================================  ==============================
 
 Installing and Using
 -------------------------
@@ -22,6 +37,7 @@ General steps:
 1. install Python 3.6 or higher
 2. download slogviz
 3. decide whether to install the program or to NOT install it
+
 install:
 
 4. open a console and navigate to the slogviz root directory and enter UNIX: ``python setup.py install`` in a terminal or WINDOWS: ``.\setup.py install`` in the cmd.exe or Windows-Powershell
