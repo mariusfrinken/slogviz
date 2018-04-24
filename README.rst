@@ -42,35 +42,64 @@ Here is a simple guide on how to get SLogVIZ working:
 install:
 
 4. navigate to the slogviz root directory and enter
-	a. UNIX: ``python3 setup.py install`` in a terminal
-	b. WINDOWS: ``.\setup.py install`` in the cmd.exe or Windows-Powershell
+
+   * UNIX: ``python3 setup.py install`` in a terminal
+   * WINDOWS: ``.\setup.py install`` in the cmd.exe or Windows-Powershell
 5. now the program can be executed by entering ``python3 -m slogviz`` or ``python -m slogviz`` in any working directory
 
 local usage:
 
-4. open a console and navigate to the slogviz root directory and enter ``pip install -r requirements.txt``
+4. open a console and navigate to the slogviz root directory and enter ``pip install -r requirements.txt`` (or ``pip3 install -r requirements.txt``)
 5. now the program can be executed by entering ``python -m slogviz``, but only in the slogviz root directory
 
-Windows 10:
-
-On how to enable ANSI Terminal Control: `See this superuser answer
-<https://superuser.com/a/1300251>`_.
-
+When executing the module with one or more log files passed via the ``-f`` argument, the main loop will be displayed:
 
 .. image:: https://raw.githubusercontent.com/mariusfrinken/slogviz/assets/menu.png
+
+When selecting a plot, a new Window will be opened with the chosen visualization. After closing this window, the main loop is presented again.
+
+Inside the ``testfiles`` directory are some sample log files, which might help to understand the usage of SLogVIZ.
+
+Plots
+######
+
+All plots produced by SLogVIZ are generated with the **matplotlib** module, thus the plot window offers various options to interact with it. Additionally, SLogVIZ has a neat feature, that in most plots one can hover with the mouse over a data point and get information about the related log file entry in a text box.
+
+For a detailed description of the different plots offered by SLogVIZ, please see the wiki_.
+
+Advanced Usage
+################
+
+Filtering
+~~~~~~~~~
+
+For filtering log files before visualizing, use the command line options or their interactive counterparts, option 6 & 7 in the main loop.
+
+Generally a look at the ouput of ``python3 -m slogviz -h`` maybe helpful in order to see what command line arguments are used by SLogVIZ .
+
+Correlation
+~~~~~~~~~~~~
+
+SLogVIZ is also able to evaluate log file entries against correlation rules written in Python.
+
+For this purpose, a correlation rule needs to be defined as a function in a file named ``rules.py`` inside the current working directory. SLogVIZ comes with a sample file of this type, please refer to its documentation for further instructions on how to write correlation rules.
+
+Once such a file is present, simply execute SLogVIZ with the files you want to correlate and choose option 8 in the main loop.
+
 
 License and other legal stuff
 -------------------------------
 This tool is published under the MIT License, see `LICENCE
-<https://raw.githubusercontent.com/mariusfrinken/slogviz/master/LICENSE>`_.
+<https://github.com/mariusfrinken/slogviz/blob/master/LICENSE>`_.
 
 The author wants to clarify that SLogVIZ is not meant to serve as a total replacement of conventional log analysis tools and methods.
 
 Contributing to SLogVIZ
 -------------------------
-Please refer to the `Wiki
-<https://github.com/mariusfrinken/slogviz/wiki>`_.
+Please refer to the wiki_.
 
+
+.. _wiki: https://github.com/mariusfrinken/slogviz/wiki
 .. _here: https://github.com/mariusfrinken/slogviz/archive/master.zip
 
 

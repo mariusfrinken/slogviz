@@ -1,7 +1,7 @@
 """
 This file is an example for how SLogVIZ can correlate log file entries.
-In order to define your own correlation rule, simply add a function, that takes a list of entries,
-and returns a subset of them.
+In order to define your own correlation rule, simply add a function,
+that takes a list of logfileclasses.logfile_entry objects, and returns a subset of them.
 The returned list is meant to represent all entries that are interesting, meaning they are in some way correlated, consistent or
 inconsistent.
 
