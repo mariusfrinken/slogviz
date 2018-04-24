@@ -51,14 +51,24 @@ def _select_entries_param(list, param):
 
 #START exported classes
 class logfile_entry(object):
-	"""A class for storing one single log file entry
+	"""A class for storing one single log file entry.
+
+	Attributes:
+	id -- a numerical id, assumed to be assigned sequentially in time
+	      the id shall be unique among all entries from one file
+	origin_name -- a string containing the name of the origin log file
+	message -- the message of an entry, a string
+	structured_data -- the whole data of an entry, kept in the original structure
+	timestamp -- a datetime object assumed to be in UTC format
+	hostname -- a string representing the hostname that logged the entry
+	source --  string representing the application/other source that logged the entry
 	"""
 	def __init__(self, id, origin_name, message, structured_data, timestamp, hostname, source):
 		self.id = id
 		self.origin_name = origin_name
 		self.message = message
 		self.structured_data = structured_data
-		self.timestamp = timestamp # a datetime object assumed to be in UTC format
+		self.timestamp = timestamp
 		self.hostname = hostname
 		self.source = source
 
@@ -66,7 +76,19 @@ class logfile_entry(object):
 		return 'Entry {0.id} at {0.timestamp} from file {0.origin_name}, hostname {0.hostname} and source {0.source} with the message:\n {0.message}'.format(self)
 
 class logfile(object):
-	"""A class for storing content and meta data of one log file
+	"""A class for storing content and meta data of one log file.
+
+	Attributes:
+	name -- a string, the name of the original file
+	lines -- a number counting the amount of logfile_entry object inside the content attribute
+	type -- the file format of the original file
+	content --  a list of logfile_entry objects that represent the content of the original file
+	sources --  a list of strings representing the various source attribute occurring in all elements of the content list
+
+	Exported Functions:
+	give_plot_data -- returns the necessary data for plotting, called by the plotter sub module
+	give_plot_data_bar --  returns the necessary data for plotting a bar chart, called by the plotter sub module
+	export_to_JSON -- saves the object as a JSON file for future analysis
 	"""
 	def __init__(self, name, lines, type, content, sources):
 		self.name = name
@@ -78,24 +100,7 @@ class logfile(object):
 	def __str__(self):
 		return 'File of the type {0.type} with the name {0.name} and {0.lines} lines'.format(self)
 
-	def give_plot_data(self, remove_redundant_entries=0, sources=[]):
-		"""Filters the entries in the self.content attribute and returns the filtered list, their respective ids, timestamps and messages.
-		All list returned are sorted by the id of their respective log file entry.
-
-		Keyword arguments:
-		remove_redundant_entries -- If set to 1, all entries with the same timestamp will be condensed to one (default 0)
-		sources -- A list of sources, entries not in this list will be filtered out. If this list is empty, no filtering will occur. (default [])
-		"""
-		ret = []
-		if remove_redundant_entries:
-			ret = self.remove_redundant_entries()
-		else:
-			ret = self.content
-		ret = _select_entries_param(ret,sources)
-		ret.sort(key=lambda x: x.id)
-		return ret, _give_ids(ret, remove_redundant_entries), _give_dates(ret), _give_messages(ret)
-
-	def remove_redundant_entries(self):
+	def _remove_redundant_entries(self):
 		"""Returns the self.content list, where all entries will have different timestamps.
 		This is achieved by keeping the first occurrence of each timestamp.
 		"""
@@ -107,6 +112,23 @@ class logfile(object):
 				del dict[counter]
 			oldvalue=v.timestamp
 		return [v for k,v in dict.items()]
+
+	def give_plot_data(self, remove_redundant_entries=0, sources=[]):
+		"""Filters the entries in the self.content attribute and returns the filtered list, their respective ids, timestamps and messages.
+		All list returned are sorted by the id of their respective log file entry.
+
+		Keyword arguments:
+		remove_redundant_entries -- If set to 1, all entries with the same timestamp will be condensed to one (default 0)
+		sources -- A list of sources, entries not in this list will be filtered out. If this list is empty, no filtering will occur. (default [])
+		"""
+		ret = []
+		if remove_redundant_entries:
+			ret = self._remove_redundant_entries()
+		else:
+			ret = self.content
+		ret = _select_entries_param(ret,sources)
+		ret.sort(key=lambda x: x.id)
+		return ret, _give_ids(ret, remove_redundant_entries), _give_dates(ret), _give_messages(ret)
 
 	def give_plot_data_bar(self, frame_seconds=0):
 		"""Counts how many entries in self.content in frames of the size frame_seconds exist and returns three lists.
