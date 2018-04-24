@@ -213,7 +213,7 @@ def _readin_evtx(file):
 				source = curr_obj.Provider['Name']
 			else:
 				source = ''
-			if ( (not source in sources) or (not sources == '')):
+			if ( (not source in sources) and (not sources == '')):
 				sources.append(source)
 			line_nr = curr_obj.EventRecordID.cdata
 			content.append(logfile_entry(int(line_nr), file, curr_obj.EventID.cdata, full_line, date, curr_obj.Computer.cdata, source))
