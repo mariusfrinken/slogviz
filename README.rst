@@ -96,7 +96,7 @@ Correlation
 
 SLogVIZ is also able to evaluate log file entries against correlation rules written in Python.
 
-For this purpose, a correlation rule needs to be defined as a function in a file named ``rules.py`` inside the current working directory. SLogVIZ comes with a sample file of this type in the ``testfiles`` directory, please refer to its documentation for further instructions on how to write correlation rules.
+For this purpose, a correlation rule needs to be defined as a function in a file named ``rules.py`` inside the current working directory. SLogVIZ comes with a sample file of this type in the ``testfiles`` directory, please refer to the documentation of this file for further instructions on how to write correlation rules.
 
 Once such a file is present, simply execute SLogVIZ with the files you want to correlate and choose option 8 in the main loop.
 
