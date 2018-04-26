@@ -14,5 +14,4 @@ python-dateutil==2.7.2
 python-evtx==0.6.1
 pytz==2018.4
 six==1.11.0
-slogviz==0.9.0
 untangle==1.1.1

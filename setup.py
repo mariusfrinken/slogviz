@@ -19,7 +19,7 @@ DESCRIPTION = 'SLogVIZ is an Simple Log file Visualizer written in Python. It vi
 URL = 'https://github.com/mariusfrinken/slogviz'
 EMAIL = 'marius.frinken@fau.de'
 AUTHOR = 'Marius Frinken'
-REQUIRES_PYTHON = '>=3.6.0'
+REQUIRES_PYTHON = '>=3.5.0'
 VERSION = ''
 
 
@@ -31,6 +31,11 @@ with io.open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
 about = {}
 with open(os.path.join(here, NAME, '__version__.py')) as f:
 	exec(f.read(), about)
+
+
+if(not (sys.version_info.major == 3 and sys.version_info.minor >= 5)):
+	print("Python 3.5 or higher is required!")
+	exit()
 
 setup(
 	name=NAME,
@@ -46,8 +51,6 @@ setup(
 	include_package_data=True,
 	license=LICENSE,
 	classifiers=[
-		# Trove classifiers
-		# Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
 		'License :: OSI Approved :: MIT License',
 		'Programming Language :: Python',
 		'Programming Language :: Python :: 3',
