@@ -199,8 +199,10 @@ def _correlate(logfiles):
 				elif line in [list_of_actions.index(x) for x in list_of_actions]:
 					func = getattr(module, list_of_actions[line])
 					ret = func(list_of_entries)
-					if len(ret) == 0:
-						pass
+					if not ret or len(ret) == 0:
+						print("The result is empty!")
+						time.sleep(1)
+						_delete_print(2)
 					else:
 						new_list = ["plot result", "print result to result.txt file"]
 						while True:
@@ -232,7 +234,7 @@ def main():
 	parser.add_argument("-r", "--remove_redundant_entries", type=int, default=0, help="a binary digit, when set to 1, all entries from the same logfile with the same timestamp will be removed, except for one, in most plots")
 	parser.add_argument("-j", "--export_to_JSON", type=int, default=0, help="if set to 1, one JSON file per logfile will be created, if set to 2 the structured_data field will be left empty in order to save place")
 	parser.add_argument("-s", "--select_by_sources",default='', help="a string containing the name sources, trailed by a ',' used for filtering out all entries that have sources which are NOT in the select_string")
-	parser.add_argument("-t", "--time_offset", default='', help="a string containing the time offset from UTC, may be used if syslog files are saved without timezone information")
+	parser.add_argument("-t", "--time_offset", default='', help="A string containing the time offset from UTC, may be used if syslog files are saved without timezone information. The format needs to be: + or - followed by 4 digits, example: '+0100' means UTC plus one hour ")
 	args = parser.parse_args()
 
 	_print_welcome()
@@ -272,7 +274,7 @@ def main():
 			if line == "0":
 				for log in logfiles:
 					plot_single(log,args.remove_redundant_entries, args.select_by_sources)
-					show()
+				show()
 				_delete_print(len(list_of_actions)+5)
 			elif line == "1":
 				_delete_print(len(list_of_actions)+5)
@@ -290,7 +292,7 @@ def main():
 						_delete_print(len(new_list)+4)
 				for log in logfiles:
 					plot_single_file_colored(log, args.remove_redundant_entries, args.select_by_sources, rev=background)
-					show()
+				show()
 				_delete_print(len(new_list)+4)
 			elif line == "2":
 				frame_seconds = None
@@ -305,7 +307,7 @@ def main():
 				_delete_print(3)
 				for log in logfiles:
 					plot_bar_chart(log, frame_seconds=frame_seconds)
-					show()
+				show()
 				_delete_print(len(list_of_actions)+5)
 			elif line == "3":
 				plot_multiple_timeline(logfiles,args.remove_redundant_entries,args.select_by_sources)

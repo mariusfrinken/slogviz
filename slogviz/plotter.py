@@ -135,7 +135,7 @@ def plot_single_file_colored(log, remove_redundant_entries, select_string, rev=T
 
 	fig, ax = plt.subplots(figsize=(11,7))
 	fig.autofmt_xdate()
-	plot_data, _ , _ , _ = log.give_plot_data(remove_redundant_entries=remove_redundant_entries)
+	plot_data, _ , _ , _ = log.give_plot_data(sources=selected_sources, remove_redundant_entries=remove_redundant_entries)
 	color_map = plt.get_cmap('gist_ncar')
 	# see https://matplotlib.org/users/colormaps.html
 	color_index = [color_map(1.*i/len(selected_sources)) for i in range(0,len(selected_sources))]

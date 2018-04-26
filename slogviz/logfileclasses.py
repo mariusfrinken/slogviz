@@ -47,6 +47,23 @@ def _select_entries_param(list, param):
 		return [x for x in list]
 	return [x for x in list if x.source in param]
 
+
+def _remove_redundant_entries(list):
+	"""Returns the sub set of list, where all entries will have different timestamps.
+	This is achieved by keeping the first occurrence of each timestamp.
+
+	Positional arguments:
+	list -- a list of logfile_entry objects
+	"""
+	dict = {x: list[x] for x in range(0, len(list))}
+	oldvalue = None
+	for counter in range(0, len(list)):
+		v = dict[counter]
+		if counter>1 and oldvalue == v.timestamp:
+			del dict[counter]
+		oldvalue = v.timestamp
+	return [v for k,v in dict.items()]
+
 #END internal functions
 
 #START exported classes
@@ -100,19 +117,6 @@ class logfile(object):
 	def __str__(self):
 		return 'File of the type {0.type} with the name {0.name} and {0.lines} lines'.format(self)
 
-	def _remove_redundant_entries(self):
-		"""Returns the self.content list, where all entries will have different timestamps.
-		This is achieved by keeping the first occurrence of each timestamp.
-		"""
-		dict = {x: self.content[x] for x in range(0,self.lines)}
-		oldvalue= None
-		for counter in range(0,self.lines):
-			v = dict[counter]
-			if counter>1 and oldvalue == v.timestamp:
-				del dict[counter]
-			oldvalue=v.timestamp
-		return [v for k,v in dict.items()]
-
 	def give_plot_data(self, remove_redundant_entries=0, sources=[]):
 		"""Filters the entries in the self.content attribute and returns the filtered list, their respective ids, timestamps and messages.
 		All list returned are sorted by the id of their respective log file entry.
@@ -121,12 +125,9 @@ class logfile(object):
 		remove_redundant_entries -- If set to 1, all entries with the same timestamp will be condensed to one (default 0)
 		sources -- A list of sources, entries not in this list will be filtered out. If this list is empty, no filtering will occur. (default [])
 		"""
-		ret = []
+		ret = _select_entries_param(self.content, sources)
 		if remove_redundant_entries:
-			ret = self._remove_redundant_entries()
-		else:
-			ret = self.content
-		ret = _select_entries_param(ret,sources)
+			ret = _remove_redundant_entries(ret)
 		ret.sort(key=lambda x: x.id)
 		return ret, _give_ids(ret, remove_redundant_entries), _give_dates(ret), _give_messages(ret)
 
