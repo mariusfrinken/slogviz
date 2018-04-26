@@ -22,7 +22,7 @@ In this file, the Command Line Arguments of SLogVIZ are defined:
 Exported functions:
 main -- the main loop of SLogVIZ
 """
-
+import os.path
 import re
 import time
 import importlib
@@ -242,7 +242,7 @@ def main():
 	p = re.compile(r'^[+-]{1}(\d){4}$')
 	m = p.match(args.time_offset)
 	if m:
-		logfiles = [readin(x, time_offset=args.time_offset) for x in file_names]
+		logfiles = [readin(x, time_offset=args.time_offset) for x in file_names if os.path.isfile(x) ]
 	else:
 		logfiles = [readin(x) for x in file_names]
 	logfiles = [x for x in logfiles if x ]
@@ -252,7 +252,7 @@ def main():
 	if not len(logfiles) == len(file_names):
 		for x in file_names:
 			if x not in [y.name for y in logfiles]:
-				print("file " + x + " can not be parsed!")
+				print("file " + x + " can not be parsed or does not exist!")
 				time.sleep(2)
 				_delete_print(2)
 
