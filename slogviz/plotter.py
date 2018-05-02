@@ -69,7 +69,7 @@ def plot_single(log, remove_redundant_entries, select_string):
 	"""
 	selected_sources = _transform_select_string(select_string,log)
 	plot_data , lines, dates, _ = log.give_plot_data(remove_redundant_entries=remove_redundant_entries, sources=selected_sources)
-	fig, ax = plt.subplots(figsize=(11,7))
+	fig, ax = plt.subplots(figsize=(11,6))
 	fig.autofmt_xdate()
 	l, = plt.plot(dates,lines,picker=10, color='red', marker='.', linestyle='-', linewidth=0.5, ms=5, mec='blue', label=log.name )
 	myFmt = DateFormatter("%Y %d.%b %H:%M:%S")
@@ -133,7 +133,7 @@ def plot_single_file_colored(log, remove_redundant_entries, select_string, rev=T
 	"""
 	selected_sources = _transform_select_string(select_string,log)
 
-	fig, ax = plt.subplots(figsize=(11,7))
+	fig, ax = plt.subplots(figsize=(11,6))
 	fig.autofmt_xdate()
 	plot_data, _ , _ , _ = log.give_plot_data(sources=selected_sources, remove_redundant_entries=remove_redundant_entries)
 	color_map = plt.get_cmap('gist_ncar')
@@ -218,7 +218,7 @@ def plot_timeline_overview(logs):
 	Positional Arguments:
 	logs -- the logfile object to plot
 	"""
-	fig, ax = plt.subplots(figsize=(11,7))
+	fig, ax = plt.subplots(figsize=(11,6))
 	fig.autofmt_xdate()
 	c = 0
 	line2D_array = []
@@ -279,7 +279,7 @@ def plot_multiple_timeline(logs, remove_redundant_entries, select_string):
 	select_string -- a string that should contain sources, trailed by a ',',
 		used for filtering out all entries that have sources which are NOT in the select_string
 	"""
-	fig, ax = plt.subplots(figsize=(11,7))
+	fig, ax = plt.subplots(figsize=(11,6))
 	fig.autofmt_xdate()
 	line2D_array = []
 	plot_data_dict = {}
@@ -346,7 +346,7 @@ def plot_bar_chart(log, frame_seconds=-1):
 	if frame_seconds == -1:
 		frame_seconds = (log.content[-1].timestamp - log.content[0].timestamp).total_seconds() / timedelta(seconds=100).total_seconds()
 	lines,dates,areas = log.give_plot_data_bar(frame_seconds=frame_seconds)
-	fig, ax = plt.subplots(figsize=(11,7))
+	fig, ax = plt.subplots(figsize=(11,6))
 	fig.autofmt_xdate()
 	myFmt = DateFormatter("%Y %d.%b %H:%M:%S")
 	ax.xaxis.set_major_formatter(myFmt)
@@ -398,7 +398,7 @@ def plot_correlated(list_of_entries, logfiles, rule_name):
 		dates[log.name] = [x.timestamp for x in plot_data if x.origin_name == log.name]
 		ids[log.name] = [x.id for x in plot_data if x.origin_name == log.name]
 
-	fig, ax = plt.subplots(figsize=(11,7))
+	fig, ax = plt.subplots(figsize=(11,6))
 	fig.autofmt_xdate()
 
 	line2D_array = []

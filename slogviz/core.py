@@ -141,6 +141,7 @@ def _edit_selected_sources(original_selected_sources, available_sources):
 						del available_sources[line]
 		elif line == "2":
 			ret = original_selected_sources
+			available_sources = [x for x in available_sources if x not in ret]
 		elif line == "3":
 			available_sources += ret
 			ret = []
