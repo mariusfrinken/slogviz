@@ -18,6 +18,8 @@ In this file, the Command Line Arguments of SLogVIZ are defined:
 			example: -r 1
 		-s -- a string that should contain sources, trailed by a ',', used for filtering out all entries that have sources which are NOT in the select_string
 			example: -s sudo,sshd,su
+		-n -- if set to a number between 0 and 4 the corresponding timeline will be plotted without the interactive loop
+			example: -n 0
 
 Exported functions:
 main -- the main loop of SLogVIZ
@@ -33,6 +35,7 @@ from inspect import getmembers, isfunction
 from .logfileclasses import *
 from .logfileparser import *
 from .plotter import *
+import slogviz.config
 
 # START internal functions
 def _transform_select_string(select_string, logfiles):
@@ -236,9 +239,13 @@ def main():
 	parser.add_argument("-j", "--export_to_JSON", type=int, default=0, help="if set to 1, one JSON file per logfile will be created, if set to 2 the structured_data field will be left empty in order to save place")
 	parser.add_argument("-s", "--select_by_sources",default='', help="a string containing the name sources, trailed by a ',' used for filtering out all entries that have sources which are NOT in the select_string")
 	parser.add_argument("-t", "--time_offset", default='', help="A string containing the time offset from UTC, may be used if syslog files are saved without timezone information. The format needs to be: + or - followed by 4 digits, example: '+0100' means UTC plus one hour ")
+	parser.add_argument("-n", "--non_interactive", type=int, default=-1, help="if set to a number between 0 and 4 the corresponding timeline will be plotted without the interactive loop")
 	args = parser.parse_args()
 
-	_print_welcome()
+	if(args.non_interactive != -1):
+		slogviz.config.interactive = False;
+	if(slogviz.config.interactive):
+		_print_welcome()
 	file_names = args.file_names.split(',')
 	p = re.compile(r'^[+-]{1}(\d){4}$')
 	m = p.match(args.time_offset)
@@ -247,26 +254,60 @@ def main():
 	else:
 		logfiles = [readin(x) for x in file_names]
 	logfiles = [x for x in logfiles if x ]
-	_delete_print(4)
+	if(slogviz.config.interactive):
+		_delete_print(4)
 
 	#when one or more files could not be parsed
 	if not len(logfiles) == len(file_names):
 		for x in file_names:
 			if x not in [y.name for y in logfiles]:
 				print("file " + x + " can not be parsed or does not exist!")
-				time.sleep(2)
-				_delete_print(2)
+				if(slogviz.config.interactive):
+					time.sleep(2)
+					_delete_print(2)
 
 	#when all files could not be parsed
 	if len(logfiles) == 0:
 		print("No file was given with the -f argument that slogviz can parse")
-		print()
-		_print_bye()
+		if(slogviz.config.interactive):
+			print()
+			_print_bye()
 		return
 
 	if args.export_to_JSON:
 		for x in logfiles:
 			x.export_to_JSON(sparse=(args.export_to_JSON == 2))
+	elif args.non_interactive != -1:
+		if args.non_interactive == 0:
+			for log in logfiles:
+				plot_single(log,args.remove_redundant_entries, args.select_by_sources)
+			show()
+			return
+		elif args.non_interactive == 1: #TODO: Option haeufige vorne/hinten
+			for log in logfiles:
+				plot_single_file_colored(log, args.remove_redundant_entries, args.select_by_sources)
+			show()
+			return
+		elif args.non_interactive == 2:
+			for log in logfiles:
+				plot_bar_chart(log)
+			show()
+			return
+		elif args.non_interactive == 3:
+			plot_multiple_timeline(logfiles,args.remove_redundant_entries,args.select_by_sources)
+			show()
+			return
+		elif args.non_interactive == 4:
+			plot_timeline_overview(logfiles)
+			show()
+			return
+		elif args.non_interactive == 5:
+			superplot(logfiles,args.remove_redundant_entries, args.select_by_sources)
+			show()
+			return
+		else: 
+			print("No available plot parameter given. See slogviz -h.")
+			return
 	else:
 		list_of_actions = ["plot single timeline(s)", "plot single timeline(s), colorcoded by source", "plot single timeline bar chart(s)", "plot multiple timeline", "plot overview timeline", "produce all plots", "filter by sources (does not affect option 2 and 4)", "filter redundant timestamps (does not affect option 2 and 4)", "correlate with rules.py"]
 		while True:

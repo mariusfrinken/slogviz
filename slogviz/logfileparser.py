@@ -16,25 +16,27 @@ import Evtx.Evtx as evtx
 import untangle
 
 from .logfileclasses import *
+import slogviz.config
 
 #START internal functions
 def _print_progress(counter):
-	"""Prints one line with the number of the parsed entry.
+	"""Prints one line with the number of the parsed entry if the interactive mode is used.
 	The line is ended by a carriage return.
 
 	Positional arguments:
 	counter -- the number to print
 	"""
-	print('parse log file entry nr: {}'.format(counter),end='\r')
+	if(slogviz.config.interactive):
+		print('parse log file entry nr: {}'.format(counter),end='\r')
 
 def _delete_print(number=1):
 	"""Deletes a number of lines from stdout.
-	Used to reduce redundant or temporal data from the command line interface.
+	Used to reduce redundant or temporal data from the command line interface if the interactive mode is used.
 
 	Keyword arguments:
 	number -- the amount of lines to delete (default 1)
 	"""
-	if not platform.system() == 'Windows':#Windows does not fully implement ANSI Control Characters, see README
+	if slogviz.config.interactive and not platform.system() == 'Windows':#Windows does not fully implement ANSI Control Characters, see README
 		print('\x1b[2K\x1b[1A'*number)
 
 def _readin_syslog(file, time_offset='+0000'):
@@ -195,7 +197,7 @@ def _readin_evtx(file):
 		sources = []
 		for record in log.records():
 			c += 1
-			print('parse log file entry nr: {}'.format(c),end='\r')
+			_print_progress(c)
 			try:
 				obj = untangle.parse(record.xml())#untangle can produce an OSError on Windows, since Windows uses a different format for timestamps
 			except OSError:
@@ -234,7 +236,7 @@ def readin(file, time_offset='+0000'):
 	Positional arguments:
 	file -- the name of the file to readin as a string, here name euqals path to the file
 	"""
-	p = re.compile(r'^.*log$')
+	p = re.compile(r'^.*log\.?(\d)*$')
 	if p.match(file):
 		return _readin_syslog(file, time_offset)
 	else:
