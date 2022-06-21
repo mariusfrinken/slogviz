@@ -4,7 +4,7 @@ cycler==0.10.0
 hexdump==3.3
 kiwisolver==1.0.1
 matplotlib==3.0.2
-numpy==1.15.4
+numpy==1.22.0
 pluggy==0.6.0
 py==1.5.3
 pyparsing==2.2.0
